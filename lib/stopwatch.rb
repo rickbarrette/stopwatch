@@ -9,7 +9,6 @@ module Stopwatch
     Stopwatch::Hooks # just load it
   end
 
-
   def self.settings
     Setting.plugin_stopwatch
   end
@@ -41,5 +40,9 @@ module Stopwatch
     else
       return activities.detect{ |a| a == default || a.parent == default }
     end
+  end
+
+  def self.highlighted_links
+    settings[:highlighted_links]
   end
 end
