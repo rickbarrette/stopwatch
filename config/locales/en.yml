@@ -1,6 +1,25 @@
 en:
   label_stopwatch_start: Start tracking
   label_stopwatch_stop: Stop tracking
+  label_stopwatch_running_timers: Running timers
+  label_stopwatch_no_running_timers: No timers are running.
+  label_stopwatch_refresh: Refresh
+  label_stopwatch_started_at: Started
+  label_stopwatch_running_for: Running for
+  label_stopwatch_entry_total: Entry total
+  label_stopwatch_stop_timer: Stop
+  label_stopwatch_stopped_at: Stopped at
+  label_stopwatch_unknown_start: unknown
+  text_stopwatch_unknown_start: "Started before start times were recorded; it will show once the timer is restarted"
+  text_stopwatch_stopped_at: "Optional: when they actually stopped working. Hours logged after this time are taken off the entry. Leave blank to stop now."
+  text_stopwatch_confirm_stop: "Stop %{name}'s timer?"
+  text_stopwatch_running_timers_help: "Oldest first. To stop a forgotten timer at the time the person left, fill in \"Stopped at\" before pressing Stop; otherwise it stops now."
+  text_stopwatch_timer_stopped_by: "[Timer stopped by %{name}, at %{time}]"
+  notice_stopwatch_timer_stopped_for: "Stopped %{name}'s timer (%{hours} on this run)."
+  notice_stopwatch_timer_not_running: "%{name}'s timer was no longer running."
+  error_stopwatch_invalid_stop_time: "That stop time couldn't be read. Please pick a date and time."
+  permission_view_running_timers: View running timers
+  permission_stop_running_timers: Stop other users' timers
   text_stopwatch_timer_capped: "[Timer stopped automatically at the %{hours} hour limit - please check these hours]"
   stopwatch:
     settings:

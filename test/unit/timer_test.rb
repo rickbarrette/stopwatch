@@ -168,4 +168,36 @@ class TimerTest < ActiveSupport::TestCase
     assert_no_enqueued_jobs
     assert_equal hours, @time_entry.reload.hours
   end
+
+  test "stop_for trims hours logged after the chosen stop time" do
+    hours = @time_entry.hours
+    @timer.start @time_entry
+    data[:started_at] = data[:session_started_at] = 3.hours.ago.to_i
+    @timer.save
+    @timer.update # saves the 3 hours, as the server does every minute
+
+    kept = @timer.stop_for(at: 2.hours.ago, by: User.find(2))
+
+    assert_in_delta 1.0, kept, 0.01
+    assert_in_delta hours + 1, @time_entry.reload.hours, 0.01
+    assert_includes @time_entry.comments, 'Timer stopped by'
+    refute Stopwatch::Timer.new(User.find(@user.id)).running?
+  end
+
+  test "stop_for never moves the stop time outside the run" do
+    hours = @time_entry.hours
+    @timer.start @time_entry
+    data[:started_at] = data[:session_started_at] = 1.hour.ago.to_i
+    @timer.save
+
+    @timer.stop_for(at: 1.day.from_now) # later than now: stops now
+
+    assert_in_delta hours + 1, @time_entry.reload.hours, 0.01
+  end
+
+  test "stop_for by the owner adds no note" do
+    @timer.start @time_entry
+    @timer.stop_for(by: @user)
+    refute_includes @time_entry.reload.comments.to_s, 'Timer stopped by'
+  end
 end

@@ -1,3 +1,18 @@
 tr.time-entry.running td.hours {
   color: red;
 }
+/* Running timers page */
+table.stopwatch-running-timers td.hours.running {
+  color: red;
+  font-weight: bold;
+}
+table.stopwatch-running-timers .stopwatch-stop-form {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  margin: 0;
+}
+.stopwatch-unknown {
+  color: #888;
+  cursor: help;
+}

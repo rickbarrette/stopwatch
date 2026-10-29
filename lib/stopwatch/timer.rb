@@ -7,6 +7,7 @@ module Stopwatch
   #   time_entry_id  - the time entry the timer adds to
   #   session_hours  - hours already added since the timer was started, for the maximum timer length
   #   tick_token     - identifies this start's chain of server-side saves (StopwatchTimerTickJob)
+  #   session_started_at - when the timer was started (started_at moves forward with every save)
   class Timer
     class HourFormatter
       include ApplicationHelper
@@ -44,6 +45,7 @@ module Stopwatch
         data[:session_hours] = 0.0
         data[:time_entry_id] = time_entry&.id
         data[:tick_token] = token
+        data[:session_started_at] = data[:started_at]
         save
       end
       # Keep saving the time on the server every minute while it runs
@@ -52,6 +54,53 @@ module Stopwatch
 
     def stop
       update stop: true
+    end
+
+    # Stops the timer for someone else (e.g. a manager on the running timers page).
+    # at:  when the timer should have stopped, e.g. when the person actually left. Hours logged after
+    #      that are taken back off the entry. Must be between the start and now; nil means now.
+    # by:  the user stopping it; noted in the entry's comment.
+    # Returns the hours this timer session ends up with, or nil if the timer wasn't running.
+    def stop_for(at: nil, by: nil)
+      locked do
+        return nil unless running?
+
+        started = session_started_at
+        total = session_hours # before saving, so a timer at its limit is trimmed correctly too
+        apply_elapsed_time(stop: true)
+        save
+
+        entry = time_entry # fresh copy, after the elapsed time was saved
+        keep = total
+        stopped_at = Time.now
+        if entry && at && started
+          stopped_at = Time.at(at.to_i.clamp(started.to_i, Time.now.to_i))
+          keep = [(stopped_at - started).to_f / 1.hour, total].min
+          excess = total - keep
+          entry.update_columns(hours: [entry.read_attribute(:hours).to_f - excess, 0].max) if excess.positive?
+        end
+
+        if entry && by && by != user
+          zone = user.time_zone || Time.zone
+          note = I18n.t(:text_stopwatch_timer_stopped_by, name: by.name,
+                        time: stopped_at.in_time_zone(zone).strftime('%Y-%m-%d %H:%M'))
+          entry.update_columns(comments: [entry.comments.to_s.presence, note].compact.join(' ').truncate(1024))
+        end
+
+        Rails.logger.info "[Stopwatch] Timer for user ##{user.id} stopped by #{by ? "user ##{by.id}" : 'system'}, #{keep.round(2)}h kept"
+        keep
+      end
+    end
+
+    # When this timer was started, or nil for timers started before the start time was recorded
+    def session_started_at
+      ts = data[:session_started_at]
+      ts.present? ? Time.at(ts.to_i) : nil
+    end
+
+    # Hours this timer has run since it was started (saved plus unsaved, never beyond the limit)
+    def session_hours
+      data[:session_hours].to_f + unsaved_hours
     end
 
     # Saves the time elapsed since the last save into the time entry, then stops the timer
@@ -149,6 +198,7 @@ module Stopwatch
         Rails.logger.info "[Stopwatch] Timer for user ##{user.id} stopped at the #{Stopwatch.max_timer_hours}h limit" if capped
         data[:started_at] = nil
         data[:session_hours] = 0.0
+        data[:session_started_at] = nil
       else
         data[:started_at] = Time.now.to_i
         data[:session_hours] = data[:session_hours].to_f + hours

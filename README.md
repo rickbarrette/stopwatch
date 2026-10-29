@@ -39,6 +39,11 @@ Rick Barrette (2026):
   - Issue timers require an issue the user can see; starting twice moves the timer instead of
     erroring.
   - Tests run against Redmine 7.0.
+- **Running timers page (October 2026):** a top-menu page listing everyone's running timers, with
+  owner, issue, project, activity, start time, how long it has run and the entry total, oldest first.
+  Two role permissions: *View running timers* and *Stop other users' timers*, applied per project.
+  A forgotten timer can be stopped at the time the person actually left; hours logged after that
+  are taken off the entry, and the entry's comment notes who stopped it.
 
 ## Installation
 

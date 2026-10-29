@@ -1,0 +1,77 @@
+<div class="contextual">
+  <%= link_to sprite_icon(:reload, l(:label_stopwatch_refresh)), stopwatch_running_timers_path, class: 'icon icon-reload' %>
+</div>
+
+<h2><%= l(:label_stopwatch_running_timers) %></h2>
+
+<% if @rows.empty? %>
+  <p class="nodata"><%= l(:label_stopwatch_no_running_timers) %></p>
+<% else %>
+  <div class="autoscroll">
+    <table class="list stopwatch-running-timers">
+      <thead>
+        <tr>
+          <th><%= l(:field_user) %></th>
+          <th><%= l(:field_issue) %></th>
+          <th><%= l(:field_project) %></th>
+          <th><%= l(:field_activity) %></th>
+          <th><%= l(:label_stopwatch_started_at) %></th>
+          <th><%= l(:label_stopwatch_running_for) %></th>
+          <th><%= l(:label_stopwatch_entry_total) %></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @rows.each do |row| %>
+          <% entry = row.time_entry %>
+          <tr class="<%= cycle('odd', 'even') %>" id="stopwatch-running-timer-<%= row.user.id %>">
+            <td class="user"><%= avatar(row.user, size: 16) %> <%= link_to_user row.user %></td>
+            <td class="issue">
+              <% if row.issue %>
+                <%= row.issue.visible? ? link_to_issue(row.issue, truncate: 60) : "##{row.issue.id}" %>
+              <% end %>
+            </td>
+            <td class="project"><%= link_to_project(row.project) if row.project %></td>
+            <td class="activity"><%= entry&.activity %></td>
+            <td class="started">
+              <%= row.started_at ? format_time(row.started_at) : content_tag(:span, l(:label_stopwatch_unknown_start), class: 'stopwatch-unknown', title: l(:text_stopwatch_unknown_start)) %>
+            </td>
+            <td class="hours running"><%= html_hours(format_hours(row.timer.session_hours)) %></td>
+            <td class="hours"><%= html_hours(format_hours(row.timer.time_spent)) %></td>
+            <td class="buttons">
+              <% if row.stoppable_by?(User.current) %>
+                <%= form_tag stop_stopwatch_running_timer_path(row.user), method: :post, class: 'stopwatch-stop-form',
+                             data: { confirm: l(:text_stopwatch_confirm_stop, name: row.user.name) } do %>
+                  <% if row.started_at %>
+                    <%# Optional: when the person actually stopped working; blank = now %>
+                    <%= datetime_local_field_tag :stopped_at, nil,
+                          min: row.started_at.in_time_zone(User.current.time_zone || Time.zone).strftime('%Y-%m-%dT%H:%M'),
+                          max: Time.now.in_time_zone(User.current.time_zone || Time.zone).strftime('%Y-%m-%dT%H:%M'),
+                          title: l(:text_stopwatch_stopped_at), 'aria-label': l(:label_stopwatch_stopped_at),
+                          id: "stopped_at_#{row.user.id}" %>
+                  <% end %>
+                  <%= submit_tag l(:label_stopwatch_stop_timer), name: nil, class: 'small' %>
+                <% end %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <p class="stopwatch-running-timers-help"><em class="info"><%= l(:text_stopwatch_running_timers_help) %></em></p>
+<% end %>
+
+<%= javascript_tag do %>
+  // Refresh every minute, unless someone is filling in a stop time
+  (function () {
+    setInterval(function () {
+      var busy = Array.prototype.some.call(document.querySelectorAll('.stopwatch-stop-form input[name="stopped_at"]'), function (el) {
+        return el.value !== '' || el === document.activeElement;
+      });
+      if (!busy) window.location.reload();
+    }, 60000);
+  })();
+<% end %>
+
+<% html_title(l(:label_stopwatch_running_timers)) -%>
