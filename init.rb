@@ -3,7 +3,7 @@ Redmine::Plugin.register :stopwatch do
   author 'Jens Krämer'
   author_url 'https://jkraemer.net/'
   description "Start/stop timer and quick access to today's time bookings for Redmine"
-  version '2026.10.0'
+  version '2026.10.1'
 
   requires_redmine version_or_higher: '7.0.0'
   settings default: {
