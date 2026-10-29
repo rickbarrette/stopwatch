@@ -18,6 +18,17 @@ Minimal plugin that aims to make tracking your time with Redmine much easier.
 
 ![Screenshot](https://github.com/jkraemer/stopwatch/raw/screenshots/img/screenshot.png)
 
+## Changes in this fork
+
+This is a fork of [jkraemer/stopwatch](https://github.com/jkraemer/stopwatch), modified by
+Rick Barrette (2026):
+
+- **Redmine 7:** requires Redmine 7.0+. The issue context-menu Start/Stop entry now uses Redmine 7's
+  `view_issues_context_menu_start` hook instead of patching `ContextMenusController` (July 2026).
+- **Colour-coded Start/Stop:** an optional setting ("Color-code Start/Stop") shows the issue Start
+  link in green and Stop in red, with tinted buttons on mobile (March 2026; colours adjusted for
+  readable contrast in October 2026).
+
 ## Installation
 
 Add the plugin to your Redmine installation's `plugins` folder, run `bundle

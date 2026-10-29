@@ -41,7 +41,8 @@ module Stopwatch
     end
   end
 
+  # Colour-code the issue Start/Stop links (green to start, red to stop)
   def self.highlighted_links
-    settings[:highlighted_links]
+    settings['highlighted_links'].to_s == '1'
   end
 end

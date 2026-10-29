@@ -8,6 +8,7 @@ Redmine::Plugin.register :stopwatch do
   requires_redmine version_or_higher: '7.0.0'
   settings default: {
     'default_activity' => 'always_ask',
+    'highlighted_links' => '0',
   }, partial: 'stopwatch/settings'
 
   menu :account_menu, :stopwatch,

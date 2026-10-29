@@ -1,22 +1,27 @@
-a.stopwatch_issue_timer[href*="stop"] {
-  color: red;
+/* Colour-codes the issue Start/Stop tracking links (enabled in the plugin settings).
+   Matches the end of the link address, which stopwatch.js rewrites between ".../timer/start" and
+   ".../timer/stop" when a timer starts or stops, so the colour always follows the link.
+   Colours meet the 4.5:1 contrast ratio for readable text, on white and on the mobile backgrounds. */
+
+a.stopwatch_issue_timer[href$="/timer/stop"] {
+  color: #c62828;
 }
 
-a.stopwatch_issue_timer[href*="start"] {
-  color: limegreen;
+a.stopwatch_issue_timer[href$="/timer/start"] {
+  color: #2e7d32;
 }
 
 /* Mobile only */
 @media (max-width: 899px) {
-  a.stopwatch_issue_timer[href*="stop"] {
-    color: red;
+  a.stopwatch_issue_timer[href$="/timer/stop"] {
+    color: #c62828;
     background-color: #ffe5e5;
-    border: 1px solid red;
+    border: 1px solid #c62828;
   }
 
-  a.stopwatch_issue_timer[href*="start"] {
-    color: limegreen;
-    background-color: #eaffea; 
-    border: 1px solid limegreen; 
+  a.stopwatch_issue_timer[href$="/timer/start"] {
+    color: #2e7d32;
+    background-color: #eaffea;
+    border: 1px solid #2e7d32;
   }
 }

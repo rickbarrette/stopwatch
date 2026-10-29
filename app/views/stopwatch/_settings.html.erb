@@ -5,5 +5,6 @@
 
 <p>
   <label for="settings_highlighted_links"><%= t '.label_highlighted_links' %> </label>
-  <%= check_box_tag 'settings[highlighted_links]', 1, Setting.plugin_stopwatch[:highlighted_links] %>
+  <%= hidden_field_tag 'settings[highlighted_links]', '0', id: nil %>
+  <%= check_box_tag 'settings[highlighted_links]', '1', Stopwatch.highlighted_links, id: 'settings_highlighted_links' %>
 </p>
