@@ -9,6 +9,7 @@ Redmine::Plugin.register :stopwatch do
   settings default: {
     'default_activity' => 'always_ask',
     'highlighted_links' => '0',
+    'max_timer_hours' => '10',
   }, partial: 'stopwatch/settings'
 
   menu :account_menu, :stopwatch,

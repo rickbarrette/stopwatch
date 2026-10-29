@@ -4,6 +4,12 @@
 </p>
 
 <p>
+  <label for="settings_max_timer_hours"><%= t '.label_max_timer_hours' %></label>
+  <%= text_field_tag 'settings[max_timer_hours]', Stopwatch.settings['max_timer_hours'] || '10', size: 4, id: 'settings_max_timer_hours' %>
+  <em class="info"><%= t '.text_max_timer_hours' %></em>
+</p>
+
+<p>
   <label for="settings_highlighted_links"><%= t '.label_highlighted_links' %> </label>
   <%= hidden_field_tag 'settings[highlighted_links]', '0', id: nil %>
   <%= check_box_tag 'settings[highlighted_links]', '1', Stopwatch.highlighted_links, id: 'settings_highlighted_links' %>

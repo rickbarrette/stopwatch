@@ -4,6 +4,7 @@ module Stopwatch
   def self.setup
     Stopwatch::IssuesControllerPatch.apply
     ::TimeEntry.prepend Stopwatch::TimeEntryPatch
+    ::Issue.prepend Stopwatch::IssuePatch
     ::User.prepend Stopwatch::UserPatch
     Stopwatch::Hooks # just load it
   end
@@ -39,6 +40,15 @@ module Stopwatch
     else
       return activities.detect{ |a| a == default || a.parent == default }
     end
+  end
+
+  # Longest a timer may run before it is stopped automatically (hours), or nil for no limit.
+  # Protects against a forgotten timer adding a night or weekend to a time entry.
+  def self.max_timer_hours
+    value = settings['max_timer_hours']
+    return 10.0 if value.nil? # setting never saved: use the default
+    hours = value.to_s.strip.tr(',', '.').to_f
+    hours.positive? ? hours : nil
   end
 
   # Colour-code the issue Start/Stop links (green to start, red to stop)

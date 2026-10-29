@@ -14,8 +14,7 @@ jobs:
     strategy:
       matrix:
         redmine:
-          - '6.0'
-          - '6.1'
+          - '7.0'
         ruby:
           - '3.3'
         database:

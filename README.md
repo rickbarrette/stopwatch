@@ -28,6 +28,17 @@ Rick Barrette (2026):
 - **Colour-coded Start/Stop:** an optional setting ("Color-code Start/Stop") shows the issue Start
   link in green and Stop in red, with tinted buttons on mobile (March 2026; colours adjusted for
   readable contrast in October 2026).
+- **Timer safety (October 2026):**
+  - *Maximum timer length* setting (default 10 hours): a forgotten timer is stopped at the limit and
+    its time entry's comment is flagged, instead of adding a night or weekend of hours.
+  - Running timers are saved every minute on the server (a background job), so issues show the time
+    live even with no browser open; open tabs keep saving too. Saves lock the timer, so several tabs
+    can't add the same time twice.
+  - Closing an issue stops any timer running on it first, so the logged time is final (e.g. before
+    billing). Deleting a time entry only stops the timer if it runs on that entry.
+  - Issue timers require an issue the user can see; starting twice moves the timer instead of
+    erroring.
+  - Tests run against Redmine 7.0.
 
 ## Installation
 

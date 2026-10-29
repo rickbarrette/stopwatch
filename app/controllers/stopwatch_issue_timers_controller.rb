@@ -41,8 +41,11 @@ class StopwatchIssueTimersController < StopwatchController
     User.current.allowed_to?(:log_time, @project) or deny_access
   end
 
+  # Only issues the user can see (log_time on the project alone isn't enough)
   def find_issue
-    @issue = Issue.find params[:issue_id]
+    @issue = Issue.visible.find_by(id: params[:issue_id])
+    return render_404 unless @issue
+
     @project = @issue.project
   end
 end

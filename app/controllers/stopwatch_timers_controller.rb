@@ -1,12 +1,12 @@
-# weiter
+# Ideas carried over from upstream (translated from the original German notes):
 #
-# - update title / menu item after starting new entry
-# - update time entry row after context menu stop (reflect saved time)
-# - 0:60 anstelle 1:00? Redmine-bug?
+# - update title / menu item after starting a new entry
+# - update the time entry row after stopping from the context menu (show the saved time)
+# - 0:60 instead of 1:00? Redmine bug?
 #
-# - remember last activity, preselect that in 'new' form
-# - same for project, unless we are in a project context
-# - focus first field that needs an action, depending on above
+# - remember the last activity and preselect it in the 'new' form
+# - same for the project, unless we are in a project context
+# - focus the first field that needs input, depending on the above
 #
 class StopwatchTimersController < StopwatchController
 
@@ -86,6 +86,8 @@ class StopwatchTimersController < StopwatchController
 
   private
 
+  # Saves the elapsed time into the running entry (also done every minute on the server by
+  # StopwatchTimerTickJob). Safe from several tabs at once: Timer#update locks the timer record.
   def find_timer
     @timer = Stopwatch::Timer.new User.current
     @timer.update

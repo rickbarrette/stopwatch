@@ -73,6 +73,19 @@ class TicketTimerTest < Redmine::IntegrationTest
     assert_not_running
   end
 
+  test "should not start a timer on an issue the user cannot see" do
+    log_user 'jsmith', 'jsmith'
+    post "/issues/999999/timer/start", xhr: true
+    assert_response 404
+  end
+
+  test "should offer start tracking in the issue context menu" do
+    log_user 'jsmith', 'jsmith'
+    get "/issues/context_menu", params: { ids: [@issue.id] }, xhr: true
+    assert_response :success
+    assert_select "a.stopwatch_issue_timer", text: /start tracking/i
+  end
+
   test "should ask by default" do
     log_user 'jsmith', 'jsmith'
     TimeEntry.delete_all
