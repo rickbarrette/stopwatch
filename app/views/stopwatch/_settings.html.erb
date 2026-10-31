@@ -10,6 +10,12 @@
 </p>
 
 <p>
+  <label for="settings_stop_time"><%= t '.label_stop_time' %></label>
+  <%= time_field_tag 'settings[stop_time]', Stopwatch.settings['stop_time'], id: 'settings_stop_time' %>
+  <em class="info"><%= t '.text_stop_time' %></em>
+</p>
+
+<p>
   <label for="settings_highlighted_links"><%= t '.label_highlighted_links' %> </label>
   <%= hidden_field_tag 'settings[highlighted_links]', '0', id: nil %>
   <%= check_box_tag 'settings[highlighted_links]', '1', Stopwatch.highlighted_links, id: 'settings_highlighted_links' %>

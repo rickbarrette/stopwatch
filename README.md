@@ -31,6 +31,9 @@ Rick Barrette (2026):
 - **Timer safety (October 2026):**
   - *Maximum timer length* setting (default 10 hours): a forgotten timer is stopped at the limit and
     its time entry's comment is flagged, instead of adding a night or weekend of hours.
+  - *Closing time* setting (e.g. 17:00, in each user's time zone): a timer started before closing
+    stops at closing time, so no time is logged after it, and the entry's comment says so. A timer
+    started after closing is overtime and keeps running, up to the maximum timer length. Blank for none.
   - Running timers are saved every minute on the server (a background job), so issues show the time
     live even with no browser open; open tabs keep saving too. Saves lock the timer, so several tabs
     can't add the same time twice.

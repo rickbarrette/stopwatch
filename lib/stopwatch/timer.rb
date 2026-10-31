@@ -120,6 +120,25 @@ module Stopwatch
       data[:tick_token]
     end
 
+    # When this timer stops for closing time: closing time on the day it was started, if it was started
+    # before then. A timer started after closing (overtime) has none; the maximum length still applies.
+    def closes_at
+      start = data[:session_started_at] || data[:started_at]
+      return nil unless start
+
+      started = Time.at(start.to_i)
+      closing = Stopwatch.closing_time_on(started, user)
+      closing if closing && started < closing
+    end
+
+    # True when the running timer has reached closing time and should be stopped
+    def past_closing?
+      return false unless running?
+
+      closing = closes_at
+      closing.present? && Time.now >= closing
+    end
+
     # True when the running timer has reached the maximum timer length and should be stopped
     def over_limit?
       max = Stopwatch.max_timer_hours
@@ -175,27 +194,35 @@ module Stopwatch
       end
     end
 
-    # Running time not yet saved into the entry, limited by the maximum timer length
+    # Running time not yet saved into the entry, limited by the maximum timer length and by closing time
     def unsaved_hours
       hours = runtime_hours || 0
       max = Stopwatch.max_timer_hours
-      max ? [hours, [max - data[:session_hours].to_f, 0].max].min : hours
+      hours = [hours, [max - data[:session_hours].to_f, 0].max].min if max
+      closing = closes_at
+      if closing && data[:started_at]
+        hours = [hours, [(closing.to_i - data[:started_at].to_i).to_f / 1.hour, 0].max].min
+      end
+      hours
     end
 
     def apply_elapsed_time(stop:)
       hours = unsaved_hours
       capped = over_limit?
+      closed = !capped && past_closing?
       entry = time_entry
 
-      if entry && (hours.positive? || capped)
+      if entry && (hours.positive? || capped || closed)
         attributes = {}
         attributes[:hours] = entry.read_attribute(:hours).to_f + hours if hours.positive?
         attributes[:comments] = capped_comment(entry) if capped
+        attributes[:comments] = closing_comment(entry) if closed
         entry.update_columns(attributes) if attributes.any?
       end
 
-      if stop || capped
+      if stop || capped || closed
         Rails.logger.info "[Stopwatch] Timer for user ##{user.id} stopped at the #{Stopwatch.max_timer_hours}h limit" if capped
+        Rails.logger.info "[Stopwatch] Timer for user ##{user.id} stopped at closing time" if closed
         data[:started_at] = nil
         data[:session_hours] = 0.0
         data[:session_started_at] = nil
@@ -208,6 +235,16 @@ module Stopwatch
     # Notes on the entry that the timer hit the limit, so someone can correct the hours
     def capped_comment(entry)
       note = I18n.t(:text_stopwatch_timer_capped, hours: Stopwatch.max_timer_hours.to_s.sub(/\.0\z/, ''))
+      comments = entry.comments.to_s
+      return comments if comments.include?(note)
+
+      [comments.presence, note].compact.join(' ').truncate(1024)
+    end
+
+    # Notes on the entry that the timer stopped at closing time
+    def closing_comment(entry)
+      hour, minute = Stopwatch.stop_time
+      note = I18n.t(:text_stopwatch_timer_closed, time: format('%02d:%02d', hour, minute))
       comments = entry.comments.to_s
       return comments if comments.include?(note)
 

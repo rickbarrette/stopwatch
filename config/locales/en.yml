@@ -21,6 +21,7 @@ en:
   permission_view_running_timers: View running timers
   permission_stop_running_timers: Stop other users' timers
   text_stopwatch_timer_capped: "[Timer stopped automatically at the %{hours} hour limit - please check these hours]"
+  text_stopwatch_timer_closed: "[Timer stopped automatically at closing time (%{time})]"
   stopwatch:
     settings:
       label_always_ask: 'Always ask'
@@ -28,6 +29,8 @@ en:
       label_highlighted_links: "Color-code Start/Stop"
       label_max_timer_hours: "Maximum timer length (hours)"
       text_max_timer_hours: "A timer running longer than this is stopped at the limit and its entry is flagged in the comment. Leave blank or 0 for no limit."
+      label_stop_time: "Closing time"
+      text_stop_time: "Timers started before this time stop at it (in each user's time zone), so no time is logged after closing; the entry's comment notes it. Timers started after closing (overtime) keep running, up to the maximum timer length. Leave blank for no closing time."
       label_system: 'Use system default'
   stopwatch_timers:
     entries_list:

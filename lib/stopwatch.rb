@@ -51,6 +51,26 @@ module Stopwatch
     hours.positive? ? hours : nil
   end
 
+  # Closing time (stop time), as [hour, minute], or nil when none is set. Timers started before closing
+  # stop at closing time; timers started after closing (overtime) keep running.
+  def self.stop_time
+    value = settings['stop_time'].to_s.strip
+    return nil unless (m = value.match(/\A(\d{1,2}):(\d{2})\z/))
+
+    hour, minute = m[1].to_i, m[2].to_i
+    hour < 24 && minute < 60 ? [hour, minute] : nil
+  end
+
+  # Closing time on the day of the given time, in the user's time zone, or nil when no stop time is set
+  def self.closing_time_on(time, user)
+    hour, minute = stop_time
+    return nil unless hour
+
+    zone = user.time_zone || Time.zone
+    day = time.in_time_zone(zone)
+    zone.local(day.year, day.month, day.day, hour, minute)
+  end
+
   # Colour-code the issue Start/Stop links (green to start, red to stop)
   def self.highlighted_links
     settings['highlighted_links'].to_s == '1'

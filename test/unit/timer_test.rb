@@ -200,4 +200,39 @@ class TimerTest < ActiveSupport::TestCase
     @timer.stop_for(by: @user)
     refute_includes @time_entry.reload.comments.to_s, 'Timer stopped by'
   end
+
+  # Closing time: timers started before closing stop at it; timers started after closing are overtime
+  def closing_today(hour = 17)
+    zone = @user.time_zone || Time.zone
+    now = Time.now.in_time_zone(zone)
+    zone.local(now.year, now.month, now.day, hour, 0)
+  end
+
+  test "timer started before closing stops at closing time" do
+    Setting.plugin_stopwatch = Setting.plugin_stopwatch.merge('stop_time' => '17:00')
+    hours = @time_entry.hours
+    travel_to(closing_today - 2.hours) { @timer.start @time_entry }
+    travel_to(closing_today + 3.hours) { @timer.update }
+
+    @time_entry.reload
+    assert_in_delta hours + 2, @time_entry.hours, 0.01
+    refute @timer.running?
+    assert_includes @time_entry.comments, '17:00'
+  ensure
+    Setting.plugin_stopwatch = Setting.plugin_stopwatch.merge('stop_time' => '')
+  end
+
+  test "timer started after closing keeps running" do
+    Setting.plugin_stopwatch = Setting.plugin_stopwatch.merge('stop_time' => '17:00')
+    hours = @time_entry.hours
+    travel_to(closing_today + 1.hour) { @timer.start @time_entry }
+    travel_to(closing_today + 3.hours) { @timer.update }
+
+    @time_entry.reload
+    assert_in_delta hours + 2, @time_entry.hours, 0.01
+    assert @timer.running?
+    assert_equal 'work', @time_entry.comments
+  ensure
+    Setting.plugin_stopwatch = Setting.plugin_stopwatch.merge('stop_time' => '')
+  end
 end
