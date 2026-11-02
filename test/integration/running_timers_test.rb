@@ -54,7 +54,8 @@ class RunningTimersTest < Redmine::IntegrationTest
     get '/stopwatch/running_timers'
     assert_select "tr#stopwatch-running-timer-#{@worker.id} form.stopwatch-stop-form"
 
-    left_at = (2.hours.ago).in_time_zone(Time.zone).strftime('%Y-%m-%dT%H:%M') # 1 hour after starting
+    # jsmith has no time zone, so the field is in the server's local time
+    left_at = 2.hours.ago.getlocal.strftime('%Y-%m-%dT%H:%M') # 1 hour after starting
     post "/stopwatch/running_timers/#{@worker.id}/stop", params: { stopped_at: left_at }
     assert_redirected_to '/stopwatch/running_timers'
 

@@ -203,9 +203,13 @@ class TimerTest < ActiveSupport::TestCase
 
   # Closing time: timers started before closing stop at it; timers started after closing are overtime
   def closing_today(hour = 17)
-    zone = @user.time_zone || Time.zone
-    now = Time.now.in_time_zone(zone)
-    zone.local(now.year, now.month, now.day, hour, 0)
+    if (zone = @user.time_zone)
+      now = Time.now.in_time_zone(zone)
+      zone.local(now.year, now.month, now.day, hour, 0)
+    else
+      now = Time.now
+      Time.local(now.year, now.month, now.day, hour, 0)
+    end
   end
 
   test "timer started before closing stops at closing time" do
@@ -232,6 +236,20 @@ class TimerTest < ActiveSupport::TestCase
     assert_in_delta hours + 2, @time_entry.hours, 0.01
     assert @timer.running?
     assert_equal 'work', @time_entry.comments
+  ensure
+    Setting.plugin_stopwatch = Setting.plugin_stopwatch.merge('stop_time' => '')
+  end
+
+  # Redmine treats a user without a time zone as the server's local time (User#today), not UTC
+  test "closing time without a user time zone is in the server's local time" do
+    Setting.plugin_stopwatch = Setting.plugin_stopwatch.merge('stop_time' => '17:00')
+    @user.pref.update!(time_zone: '')
+    user = User.find(@user.id)
+    assert_nil user.time_zone
+
+    closing = Stopwatch.closing_time_on(Time.now, user)
+    assert_equal [17, 0], [closing.getlocal.hour, closing.getlocal.min]
+    assert_equal Time.now.to_date, closing.getlocal.to_date
   ensure
     Setting.plugin_stopwatch = Setting.plugin_stopwatch.merge('stop_time' => '')
   end

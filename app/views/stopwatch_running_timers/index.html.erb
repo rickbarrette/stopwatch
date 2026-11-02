@@ -45,8 +45,8 @@
                   <% if row.started_at %>
                     <%# Optional: when the person actually stopped working; blank = now %>
                     <%= datetime_local_field_tag :stopped_at, nil,
-                          min: row.started_at.in_time_zone(User.current.time_zone || Time.zone).strftime('%Y-%m-%dT%H:%M'),
-                          max: Time.now.in_time_zone(User.current.time_zone || Time.zone).strftime('%Y-%m-%dT%H:%M'),
+                          min: User.current.convert_time_to_user_timezone(row.started_at).strftime('%Y-%m-%dT%H:%M'),
+                          max: User.current.convert_time_to_user_timezone(Time.now).strftime('%Y-%m-%dT%H:%M'),
                           title: l(:text_stopwatch_stopped_at), 'aria-label': l(:label_stopwatch_stopped_at),
                           id: "stopped_at_#{row.user.id}" %>
                   <% end %>

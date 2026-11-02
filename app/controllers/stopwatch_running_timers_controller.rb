@@ -40,9 +40,11 @@ class StopwatchRunningTimersController < StopwatchController
     User.current.allowed_to?(:view_running_timers, nil, global: true) or deny_access
   end
 
-  # The "stopped at" field is a local date and time in the viewer's time zone
+  # The "stopped at" field is a local date and time in the viewer's time zone, or the server's local time for
+  # a viewer without one (as Redmine shows times)
   def parse_user_time(value)
-    (User.current.time_zone || Time.zone).parse(value.to_s)
+    zone = User.current.time_zone
+    zone ? zone.parse(value.to_s) : Time.parse(value.to_s)
   rescue ArgumentError
     nil
   end

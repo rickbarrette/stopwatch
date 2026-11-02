@@ -61,14 +61,19 @@ module Stopwatch
     hour < 24 && minute < 60 ? [hour, minute] : nil
   end
 
-  # Closing time on the day of the given time, in the user's time zone, or nil when no stop time is set
+  # Closing time on the day of the given time, in the user's time zone, or nil when no stop time is set.
+  # A user without a time zone gets the server's local time, as Redmine does (User#today), not UTC.
   def self.closing_time_on(time, user)
     hour, minute = stop_time
     return nil unless hour
 
-    zone = user.time_zone || Time.zone
-    day = time.in_time_zone(zone)
-    zone.local(day.year, day.month, day.day, hour, minute)
+    if (zone = user.time_zone)
+      day = time.in_time_zone(zone)
+      zone.local(day.year, day.month, day.day, hour, minute)
+    else
+      day = time.getlocal
+      Time.local(day.year, day.month, day.day, hour, minute)
+    end
   end
 
   # Colour-code the issue Start/Stop links (green to start, red to stop)

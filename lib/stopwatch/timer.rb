@@ -81,9 +81,9 @@ module Stopwatch
         end
 
         if entry && by && by != user
-          zone = user.time_zone || Time.zone
+          # The user's time zone, or the server's local time for a user without one (as Redmine shows times)
           note = I18n.t(:text_stopwatch_timer_stopped_by, name: by.name,
-                        time: stopped_at.in_time_zone(zone).strftime('%Y-%m-%d %H:%M'))
+                        time: user.convert_time_to_user_timezone(stopped_at).strftime('%Y-%m-%d %H:%M'))
           entry.update_columns(comments: [entry.comments.to_s.presence, note].compact.join(' ').truncate(1024))
         end
 
