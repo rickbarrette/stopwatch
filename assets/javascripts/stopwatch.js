@@ -110,6 +110,8 @@ window.initStopwatch = function(config){
     },
     setProjectId: function(projectId){
       var a = $('a#stopwatch-menu');
+      // Users who can't log time have no stopwatch menu link
+      if (!a.length) return;
       a.attr('href', a.attr('href').replace(/\/new.*$/, '/new?project_id='+projectId));
     }
   });
